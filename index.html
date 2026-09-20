@@ -1,378 +1,22 @@
+.DS_Store
+Thumbs.db
+node_modules/
+
 <!doctype html>
 <html lang="de">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>
-  :root{ color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
-  html,body{ margin:0; }
-  img{ max-width:100%; }
-  [hidden]{ display:none !important; }
-</style>
 <title>Daily Duel</title>
-
+<meta name="description" content="Jeden Tag fünf Challenges, für alle dieselben. Punkte nach Tempo, Streaks, Duelle gegen Freunde.">
+<meta name="theme-color" content="#FAF9F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F0E0C" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="style.css">
 </head>
-<style>
-  /* ============ TOKENS ============ */
-  :root{
-    --bg:#FAF9F6; --surface:#FFFFFF; --surface-2:#F3F0E9; --line:#E7E2D7; --line-soft:#EFEBE2;
-    --text:#171614; --text-dim:#7A756A;
-    --accent:#171614; --accent-ink:#FAF9F6;
-    --gold:#9C7C3C; --gold-soft:#C9A96A;
-    --good:#2E7D5B; --bad:#A8443B;
-    --ring:rgba(23,22,20,.09);
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#0F0E0C; --surface:#171613; --surface-2:#211F1A; --line:#2E2B25; --line-soft:#241F1A;
-      --text:#F3F0E9; --text-dim:#948E81;
-      --accent:#C9A96A; --accent-ink:#14130F;
-      --gold:#C9A96A; --gold-soft:#E0CDA4;
-      --good:#4FBF8B; --bad:#D9736A;
-      --ring:rgba(243,240,233,.1);
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#0F0E0C; --surface:#171613; --surface-2:#211F1A; --line:#2E2B25; --line-soft:#241F1A;
-    --text:#F3F0E9; --text-dim:#948E81;
-    --accent:#C9A96A; --accent-ink:#14130F;
-    --gold:#C9A96A; --gold-soft:#E0CDA4;
-    --good:#4FBF8B; --bad:#D9736A;
-    --ring:rgba(243,240,233,.1);
-    color-scheme: dark;
-  }
-
-  html,body{ height:100%; }
-  body{
-    margin:0; background:var(--bg); color:var(--text);
-    font-family:'Instrument Sans', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-    font-weight:400; font-size:14px; line-height:1.55;
-    font-variant-numeric: tabular-nums;
-    display:flex; justify-content:center;
-    -webkit-user-select:none; -moz-user-select:none; user-select:none;
-    -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none;
-  }
-  *{ box-sizing:border-box; }
-  input, textarea{ -webkit-user-select:text; user-select:text; }
-  ::selection{ background:transparent; }
-  input::selection{ background:var(--surface-2); }
-
-  h1,h2,h3{ margin:0; font-weight:400; letter-spacing:-.01em; text-wrap:balance; }
-  .serif, .disp, .hero h2, .mega, .result-big, .stage-kind, .modal h3, .modal .amount,
-  .vs-side .sc, .stat .v, .lvl-badge, .result-top .result-big{
-    font-family:'Instrument Serif', Georgia, 'Times New Roman', serif;
-    font-weight:400; letter-spacing:-.01em;
-  }
-  button{ font-family:inherit; color:inherit; }
-  button:focus-visible, input:focus-visible{ outline:1.5px solid var(--gold); outline-offset:3px; }
-  @media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; transition-duration:.001ms !important; } }
-
-  .app{ width:100%; max-width:420px; min-height:100%; display:flex; flex-direction:column; background:var(--bg); }
-
-  /* ============ TOP BAR ============ */
-  .topbar{
-    position:sticky; top:env(safe-area-inset-top,0px); z-index:30;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:18px 22px 14px; background:var(--bg);
-  }
-  .logo{ font-size:11.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; }
-  .logo em{ font-style:normal; color:var(--gold); }
-  .pills{ display:flex; gap:18px; align-items:baseline; }
-  .pill{ display:flex; align-items:baseline; gap:6px; font-size:12px; }
-  .pill .lbl{ font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); }
-  .pill .num{ font-size:13px; font-weight:600; color:var(--text); }
-  .pill.coins{ cursor:pointer; }
-  .pill.coins .num{ color:var(--gold); }
-
-  /* ============ CONTENT ============ */
-  .content{ flex:1; overflow-y:auto; padding:8px 22px calc(110px + env(safe-area-inset-bottom,0px)); }
-  .content.stage-mode{ padding:0; display:flex; flex-direction:column; }
-  .content.stage-mode > .screen{ flex:1; display:flex; flex-direction:column; }
-  .screen[hidden]{ display:none !important; }
-
-  .eyebrow{
-    display:flex; align-items:center; gap:12px;
-    font-size:10px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
-    color:var(--text-dim); margin:34px 0 14px;
-  }
-  .eyebrow::after{ content:""; flex:1; height:1px; background:var(--line); }
-  .eyebrow:first-child{ margin-top:12px; }
-
-  .card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px; }
-  .stack{ display:flex; flex-direction:column; }
-  .row{ display:flex; align-items:center; gap:12px; }
-  .row.between{ justify-content:space-between; }
-
-  /* ============ BUTTONS ============ */
-  .btn{
-    border:1px solid transparent; border-radius:12px; padding:15px 20px;
-    font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; cursor:pointer;
-    display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    transition:opacity .15s ease;
-  }
-  .btn-lime, .btn-hot{ background:var(--accent); color:var(--accent-ink); }
-  .btn-ghost{ background:transparent; color:var(--text); border-color:var(--line); }
-  .btn:active{ opacity:.72; }
-  .btn-block{ width:100%; }
-  .btn-sm{ padding:9px 15px; font-size:10px; letter-spacing:.14em; }
-  .btn[disabled]{ opacity:.32; cursor:not-allowed; }
-
-  /* ============ HERO ============ */
-  .hero{ padding:16px 0 6px; }
-  .hero .tag{ font-size:10px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); }
-  .hero h2{ font-size:38px; line-height:1.08; margin:14px 0 10px; }
-  .hero p{ margin:0 0 26px; font-size:13.5px; color:var(--text-dim); max-width:32ch; line-height:1.6; }
-
-  .slots{ display:flex; gap:1px; margin-bottom:26px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-  .slot{
-    flex:1; height:46px; display:flex; align-items:center; justify-content:center;
-    background:var(--bg); font-size:12px; color:var(--text-dim); letter-spacing:.06em;
-  }
-  .slot.done{ background:var(--accent); color:var(--accent-ink); }
-
-  /* ============ STREAK WEEK ============ */
-  .week{ display:flex; gap:5px; margin-top:20px; }
-  .day{ flex:1; text-align:center; }
-  .day .dot{ height:26px; border:1px solid var(--line); background:transparent; margin-bottom:6px; border-radius:10px; }
-  .day.hit .dot{ background:var(--gold); border-color:var(--gold); }
-  .day.today .dot{ border-color:var(--text); }
-  .day span{ font-size:9.5px; color:var(--text-dim); letter-spacing:.08em; }
-
-  /* ============ LIST ITEMS ============ */
-  .item{ display:flex; align-items:center; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); }
-  .item:last-child{ border-bottom:none; }
-  .ava{
-    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-    font-size:17px; background:var(--surface-2); flex-shrink:0;
-  }
-  .ava.lg{ width:58px; height:58px; font-size:26px; }
-  .item .meta{ flex:1; min-width:0; }
-  .item .nm{ font-weight:500; font-size:14px; }
-  .item .sb{ font-size:11.5px; color:var(--text-dim); margin-top:2px; letter-spacing:.02em; }
-  .rank{ width:24px; font-size:12px; color:var(--text-dim); flex-shrink:0; letter-spacing:.04em; }
-  .rank.top{ color:var(--gold); font-weight:600; }
-  .item.me .nm{ font-weight:700; }
-  .score-val{ font-size:14px; font-weight:600; letter-spacing:-.01em; }
-
-  .chip{ border-radius:999px; font-size:9.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--line); color:var(--text-dim); }
-  .chip.win{ color:var(--gold); border-color:color-mix(in srgb, var(--gold) 45%, var(--line)); }
-
-  /* ============ TABS ============ */
-  .tabs{ display:flex; gap:26px; border-bottom:1px solid var(--line); }
-  .tab{
-    padding:0 0 12px; font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
-    color:var(--text-dim); background:none; border:none; border-bottom:1px solid transparent;
-    cursor:pointer; margin-bottom:-1px;
-  }
-  .tab.active{ color:var(--text); border-bottom-color:var(--gold); }
-
-  /* ============ NAV ============ */
-  .nav{
-    position:fixed; bottom:calc(16px + env(safe-area-inset-bottom,0px)); left:50%; transform:translateX(-50%);
-    width:calc(100% - 36px); max-width:384px; z-index:40; display:flex; gap:4px;
-    padding:6px; background:var(--surface);
-    border:1px solid var(--line); border-radius:20px;
-    box-shadow:0 8px 28px -14px rgba(23,22,20,.35);
-  }
-  .navbtn{
-    flex:1; background:none; border:none; cursor:pointer; padding:12px 2px;
-    border-radius:15px;
-    font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim);
-    transition:opacity .12s ease;
-  }
-  .navbtn:active{ opacity:.65; }
-  .navbtn .ic{ display:none; }
-  .navbtn.active{ background:var(--accent); color:var(--accent-ink); }
-
-  /* ============ STAGE (play) ============ */
-  .stage{
-    background:var(--bg); color:var(--text); flex:1; min-height:100%;
-    display:flex; flex-direction:column;
-    padding:calc(20px + env(safe-area-inset-top,0px)) 22px calc(28px + env(safe-area-inset-bottom,0px));
-  }
-  .stage-head{ flex-shrink:0; }
-  .segs{ display:flex; gap:4px; margin-bottom:24px; }
-  .seg{ flex:1; height:2px; border-radius:2px; background:var(--line); overflow:hidden; }
-  .seg > i{ display:block; height:100%; width:0; background:var(--gold); transition:width .3s ease; }
-  .seg.miss > i{ background:var(--line); }
-
-  .stage-meta{ display:flex; justify-content:space-between; align-items:baseline; }
-  .stage-kind{ font-size:26px; }
-  .stage-count{ font-size:10.5px; color:var(--text-dim); letter-spacing:.16em; text-transform:uppercase; }
-  .stage-task{ font-size:13px; color:var(--text-dim); margin:6px 0 18px; }
-
-  .timer{ height:3px; border-radius:3px; background:var(--line); overflow:hidden; }
-  .timer > i{ display:block; height:100%; width:100%; background:var(--gold); border-radius:3px; }
-  .timer.hot > i{ background:var(--bad); }
-
-  .stage-body{
-    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:26px; text-align:center; padding:22px 0;
-  }
-  .mega{ font-size:72px; line-height:1; }
-  .mega.small{ font-size:52px; }
-  .hint{ font-size:10.5px; color:var(--text-dim); letter-spacing:.16em; text-transform:uppercase; }
-
-  .tapzone{
-    width:100%; max-width:250px; aspect-ratio:1; border-radius:10px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
-  }
-  .tapzone.wait{ background:transparent; color:var(--text-dim); border:1px solid var(--line); }
-  .tapzone.go{ background:var(--accent); color:var(--accent-ink); }
-  .tapzone.bust{ background:transparent; border:1px solid var(--bad); color:var(--bad); }
-
-  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; }
-  .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; }
-  .opt{
-    padding:19px 10px; border-radius:10px; cursor:pointer;
-    background:transparent; border:1px solid var(--line); color:var(--text);
-    font-family:'Instrument Serif', Georgia, serif; font-size:22px; transition:opacity .12s ease;
-  }
-  .opt:active{ opacity:.6; }
-  .opt.right{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
-  .opt.wrong{ border-color:var(--bad); color:var(--bad); }
-  .key{ padding:15px 6px; font-size:20px; }
-
-  .swatch{ height:72px; border-radius:10px; cursor:pointer; border:1px solid var(--line); }
-  .swatch.right{ outline:1px solid var(--gold); outline-offset:3px; }
-  .swatch.wrong{ opacity:.3; }
-
-  .chips{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
-  .wchip{
-    padding:11px 16px; border-radius:10px; cursor:pointer; font-size:13.5px;
-    background:transparent; border:1px solid var(--line); color:var(--text);
-  }
-  .wchip.got{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
-  .wchip.bad{ opacity:.28; }
-
-  .tiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; width:100%; max-width:236px; }
-  .tile{ aspect-ratio:1; border-radius:10px; cursor:pointer; border:1px solid transparent; }
-  .tile.right{ outline:1px solid var(--gold); outline-offset:3px; }
-  .tile.wrong{ opacity:.3; }
-  .tile.blank{ background:var(--surface-2) !important; }
-
-  /* ============ RESULTS ============ */
-  .result-top{ text-align:center; padding:44px 4px 14px; }
-  .result-label{ font-size:10px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); }
-  .result-big{ font-size:64px; line-height:1.05; margin:14px 0 6px; }
-  .result-big.win{ color:var(--gold); }
-  .result-sub{ font-size:12.5px; color:var(--text-dim); }
-
-  .vs{ display:flex; align-items:center; gap:12px; }
-  .vs-side{ flex:1; text-align:center; }
-  .vs-side .sc{ font-size:30px; margin-top:10px; }
-  .vs-mid{ font-size:9.5px; color:var(--text-dim); letter-spacing:.2em; text-transform:uppercase; }
-
-  .breakdown{ display:flex; flex-direction:column; padding:2px 20px; }
-  .brow{ display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--line); }
-  .brow:last-child{ border-bottom:none; }
-  .brow .idx{ font-size:11px; color:var(--text-dim); width:14px; }
-  .brow .knd{ flex:1; font-size:13.5px; }
-  .brow .tm{ font-size:11.5px; color:var(--text-dim); }
-  .brow .pts{ font-size:13.5px; font-weight:600; width:50px; text-align:right; }
-  .brow.ok .pts{ color:var(--text); }
-  .brow.no .pts{ color:var(--text-dim); }
-
-  .reward-row{ display:flex; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-  .reward-box{ flex:1; background:var(--bg); padding:20px 10px; text-align:center; }
-  .reward-box .v{ font-family:'Instrument Serif',Georgia,serif; font-size:26px; }
-  .reward-box .k{ font-size:9.5px; color:var(--text-dim); margin-top:4px; letter-spacing:.16em; text-transform:uppercase; }
-
-  /* ============ PROFILE ============ */
-  .prof-head{ text-align:center; padding:10px 0 6px; }
-  .lvl-wrap{ position:relative; width:88px; height:88px; margin:0 auto 18px; }
-  .lvl-ring{ position:absolute; inset:0; border-radius:50%; }
-  .lvl-inner{
-    position:absolute; inset:3px; border-radius:50%; background:var(--bg);
-    display:flex; align-items:center; justify-content:center; font-size:30px; border:1px solid var(--line);
-  }
-  .lvl-badge{
-    position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
-    background:var(--bg); color:var(--gold); font-size:12px;
-    padding:1px 10px; border:1px solid var(--line); border-radius:999px; white-space:nowrap;
-  }
-  #profName{
-    text-align:center; font-family:'Instrument Serif',Georgia,serif; font-size:24px;
-    border:none; background:transparent; color:var(--text); width:100%; padding:4px 0;
-  }
-  #profTitle{ color:var(--gold) !important; }
-  .stats{ display:grid; grid-template-columns:repeat(4,1fr); margin-top:22px; border-top:1px solid var(--line); padding-top:18px; }
-  .stat{ text-align:center; }
-  .stat .v{ font-size:22px; }
-  .stat .k{ font-size:9.5px; color:var(--text-dim); margin-top:3px; letter-spacing:.12em; text-transform:uppercase; }
-
-  .badges{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-  .bdg{ background:var(--bg); padding:18px 12px; text-align:center; }
-  .bdg .ic{ font-size:20px; display:block; margin-bottom:8px; }
-  .bdg .nm{ font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); }
-  .bdg.locked{ opacity:.3; }
-
-  /* ============ SHOP ============ */
-  .shop-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-  .sitem{ background:var(--bg); padding:20px 14px; text-align:center; }
-  .sitem.on{ background:var(--surface-2); }
-  .sitem .pv{ font-size:26px; margin-bottom:10px; }
-  .sitem .nm{ font-size:12.5px; }
-  .sitem .pr{ font-size:10.5px; color:var(--gold); margin:6px 0 12px; letter-spacing:.1em; text-transform:uppercase; }
-
-  /* ============ MODES ============ */
-  .mode{ display:flex; align-items:center; gap:16px; padding:18px 0; cursor:pointer; border-bottom:1px solid var(--line); }
-  .mode:last-child{ border-bottom:none; }
-  .mode .mi{ width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; background:transparent !important; border:1px solid var(--line); color:var(--text) !important; }
-  .mode .mt{ flex:1; }
-  .mode .mt .nm{ font-size:14px; font-weight:600; letter-spacing:.02em; }
-  .mode .mt .ds{ font-size:12px; color:var(--text-dim); margin-top:3px; }
-  .mode .best{ font-size:10px; color:var(--gold); margin-top:4px; letter-spacing:.12em; text-transform:uppercase; }
-
-  /* ============ OVERLAY ============ */
-  .overlay{ position:fixed; inset:0; background:rgba(15,14,12,.55); z-index:90; display:flex; align-items:center; justify-content:center; padding:24px; }
-  .overlay[hidden]{ display:none !important; }
-  .modal{ background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:34px 26px 26px; max-width:320px; width:100%; text-align:center; }
-  .modal .big-ic{ font-size:22px; display:block; margin-bottom:14px; }
-  .modal h3{ font-size:24px; margin-bottom:10px; }
-  .modal p{ font-size:12px; color:var(--text-dim); margin:0; letter-spacing:.04em; }
-  .modal .amount{ font-size:46px; color:var(--gold); margin:10px 0 6px; }
-
-  .toast{
-    position:fixed; top:calc(72px + env(safe-area-inset-top,0px)); left:50%; transform:translateX(-50%) translateY(-4px);
-    background:var(--accent); color:var(--accent-ink); padding:9px 18px; border-radius:10px;
-    font-size:10.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
-    z-index:95; opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
-  }
-  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-  .toast.miss{ background:transparent; color:var(--text-dim); border:1px solid var(--line); }
-
-
-  /* ============ PODEST ============ */
-  .podium{
-    display:grid; grid-template-columns:1fr 1.18fr 1fr; gap:8px; align-items:end;
-    border-bottom:1px solid var(--line); padding-top:6px;
-  }
-  .pod{ text-align:center; min-width:0; }
-  .pod-name{ font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .pod-score{ font-family:'Instrument Serif',Georgia,serif; font-size:17px; color:var(--text-dim); margin:2px 0 10px; }
-  .pod-block{
-    display:flex; align-items:center; justify-content:center;
-    border:1px solid var(--line); border-bottom:none; border-radius:12px 12px 0 0;
-    font-family:'Instrument Serif',Georgia,serif; font-size:24px; color:var(--text-dim);
-  }
-  .pod.p1 .pod-name{ font-size:13.5px; }
-  .pod.p1 .pod-score{ color:var(--gold); font-size:22px; }
-  .pod.p1 .pod-block{ height:98px; background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-size:30px; }
-  .pod.p2 .pod-block{ height:74px; }
-  .pod.p3 .pod-block{ height:58px; }
-  .pod.me .pod-name{ font-weight:700; }
-
-  .empty{ font-size:12px; color:var(--text-dim); text-align:center; padding:30px 12px; letter-spacing:.04em; }
-</style>
-
 <body>
+
 <div class="app">
 
   <div class="topbar">
@@ -399,7 +43,7 @@
       <div class="card">
         <div class="row between">
           <div>
-            <div class="disp" style="font-size:30px; line-height:1.1;"><span id="streakNum">0</span> Tage</div>
+            <div class="disp" style="font-size:30px; line-height:1.1;"><span id="streakNum">0</span> <span id="streakUnit">Tage</span></div>
             <div style="font-size:11.5px; color:var(--text-dim); font-weight:700; margin-top:2px;" id="streakHint">Heute spielen startet deine Serie</div>
           </div>
           
@@ -563,866 +207,444 @@
   <div class="toast" id="toast"></div>
 </div>
 
-<script>
-(function(){
-  "use strict";
-
-  /* ---------- helpers ---------- */
-  const $ = (id)=> document.getElementById(id);
-  function pad2(n){ return n<10 ? "0"+n : ""+n; }
-  function dayKey(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
-  function todayKey(){ return dayKey(new Date()); }
-  function hashStr(s){ let h=1779033703 ^ s.length; for(let i=0;i<s.length;i++){ h=Math.imul(h ^ s.charCodeAt(i),3432918353); h=(h<<13)|(h>>>19); } return function(){ h=Math.imul(h ^ (h>>>16),2246822507); h=Math.imul(h ^ (h>>>13),3266489909); h^=h>>>16; return h>>>0; }; }
-  function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a ^ a>>>15, 1|a); t=t+Math.imul(t ^ t>>>7, 61|t) ^ t; return ((t ^ t>>>14)>>>0)/4294967296; }; }
-  function rngOf(seed){ const h=hashStr(seed); return mulberry32(h()); }
-  function pick(rng,a){ return a[Math.floor(rng()*a.length)]; }
-  function pickN(rng,a,n){ const c=a.slice(), out=[]; while(out.length<n && c.length) out.push(c.splice(Math.floor(rng()*c.length),1)[0]); return out; }
-  function shuffle(rng,a){ const x=a.slice(); for(let i=x.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [x[i],x[j]]=[x[j],x[i]]; } return x; }
-  function rInt(rng,min,max){ return Math.floor(rng()*(max-min+1))+min; }
-  function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-  const now = ()=> performance.now();
-
-  let LS_OK = true;
-  try{ const k="__t"; localStorage.setItem(k,"1"); localStorage.removeItem(k); }catch(e){ LS_OK=false; }
-  function load(key,fb){ if(!LS_OK) return fb; try{ const v=localStorage.getItem(key); return v==null?fb:JSON.parse(v); }catch(e){ return fb; } }
-  function store(key,val){ if(!LS_OK) return; try{ localStorage.setItem(key,JSON.stringify(val)); }catch(e){} }
-
-  /* ---------- content ---------- */
-  const NAMES=["Lina","Finn","Mara","Kaya","Noel","Ida","Theo","Leni","Mio","Nora","Elias","Frieda","Anton","Sina","Jonas","Emil","Paula","Luis","Mila","Ben","Ronja","Piet","Zoe","Karl","Vera","Timo","Alva","Kian"];
-  const WORDS={
-    S:["Sonne","Stern","Stuhl","Straße","Sand","Segel","Katze","Baum","Fisch","Mond","Spiegel","Berg","Wolke","Suppe"],
-    B:["Blume","Baum","Ball","Berg","Buch","Brot","Katze","Sonne","Boot","Brücke","Banane","Fisch","Biene","Wald"],
-    F:["Fisch","Fenster","Feuer","Flasche","Freund","Fahrrad","Katze","Sonne","Frosch","Farbe","Fuchs","Baum","Feder","Wald"],
-    M:["Mond","Maus","Musik","Meer","Motor","Melone","Katze","Sonne","Milch","Mütze","Berg","Mauer","Baum","Möwe"],
-    W:["Wolke","Wald","Wasser","Wind","Wagen","Wiese","Katze","Sonne","Winter","Würfel","Berg","Wurm","Baum","Weg"]
-  };
-  const COLORS=[
-    {n:"Rot",h:"#FF4D4D"},{n:"Blau",h:"#3B82F6"},{n:"Grün",h:"#22C55E"},
-    {n:"Gelb",h:"#FACC15"},{n:"Pink",h:"#FF2E9A"},{n:"Orange",h:"#FB923C"}
-  ];
-  const TILE_HEX=["#FF4D4D","#3B82F6","#22C55E","#FACC15","#FF2E9A","#FB923C","#2EE6FF","#C8FF2E","#A78BFA"];
-  const FRIENDS=[
-    {id:"f1",name:"Mara",ava:"🦊",skill:.78},
-    {id:"f2",name:"Finn",ava:"🐼",skill:.62},
-    {id:"f3",name:"Kaya",ava:"🐸",skill:.9},
-    {id:"f4",name:"Theo",ava:"🦁",skill:.55},
-    {id:"f5",name:"Ida",ava:"🐧",skill:.7}
-  ];
-  const SHOP={
-    avatar:[
-      {id:"av_fox",name:"Fuchs",pv:"🦊",price:120},{id:"av_panda",name:"Panda",pv:"🐼",price:120},
-      {id:"av_bot",name:"Roboter",pv:"🤖",price:200},{id:"av_ninja",name:"Ninja",pv:"🥷",price:250},
-      {id:"av_alien",name:"Alien",pv:"👾",price:280},{id:"av_uni",name:"Einhorn",pv:"🦄",price:320}
-    ],
-    background:[
-      {id:"bg_neon",name:"Neon",pv:"🟩",price:150},{id:"bg_night",name:"Midnight",pv:"🟪",price:180},
-      {id:"bg_sunset",name:"Sunset",pv:"🟧",price:180},{id:"bg_gold",name:"Gold",pv:"🟨",price:300}
-    ],
-    title:[
-      {id:"tt_fast",name:"Blitzschnell",pv:"⚡",price:100},{id:"tt_brain",name:"Big Brain",pv:"🧠",price:100},
-      {id:"tt_night",name:"Nachteule",pv:"🌙",price:120},{id:"tt_goat",name:"GOAT",pv:"🐐",price:450}
-    ],
-    effect:[
-      {id:"ef_spark",name:"Funken",pv:"✨",price:220},{id:"ef_fire",name:"Flammen",pv:"🔥",price:260},
-      {id:"ef_conf",name:"Konfetti",pv:"🎉",price:200},{id:"ef_ice",name:"Frost",pv:"❄️",price:240}
-    ]
-  };
-  const BADGES=[
-    {id:"streak7",ic:"🔥",name:"7 Tage",desc:"7 Tage in Folge gespielt."},
-    {id:"streak30",ic:"💎",name:"30 Tage",desc:"30 Tage in Folge gespielt."},
-    {id:"firstwin",ic:"🥇",name:"Erster Sieg",desc:"Dein erstes Duell gewonnen."},
-    {id:"tenwins",ic:"🏆",name:"10 Siege",desc:"Zehn Duelle gewonnen."},
-    {id:"perfect",ic:"🎯",name:"Perfekt",desc:"Alle 5 Challenges an einem Tag richtig."}
-  ];
-  const KIND_LABEL={ memory:"Memory", reaction:"Reaction", math:"Math", color:"Color", words:"Words", observation:"Observation" };
-
-  /* ---------- state ---------- */
-  const FRESH = {
-    profile:{ username:"Player"+Math.floor(Math.random()*900+100), level:1, xp:0, coins:80, wins:0, losses:0, longestStreak:0,
-      equipped:{ avatar:"🙂", background:null, title:null, effect:null } },
-    inventory:[], streak:{ count:0, last:null }, lastReward:null, badges:[], duels:[],
-    modeBest:{ sudden:0, endless:0 }, history:{}
-  };
-  let S = load("dd_v2", null) || JSON.parse(JSON.stringify(FRESH));
-  for(const k in FRESH){ if(!(k in S)) S[k] = JSON.parse(JSON.stringify(FRESH[k])); }
-  function save(){ store("dd_v2", S); }
-
-  /* ---------- challenges ---------- */
-  const TYPES=["memory","reaction","math","color","words","observation"];
-
-  function dailySet(key){
-    const rng = rngOf("d:"+key);
-    return shuffle(rng, TYPES).slice(0,5).map((t,i)=> build(t, rngOf("d:"+key+":"+i+":"+t)));
-  }
-  function build(type, rng){
-    if(type==="memory"){
-      const len = rInt(rng,3,5); let n="";
-      for(let i=0;i<len;i++) n += rInt(rng,0,9);
-      return { type, task:"Merk dir die Zahl.", limit:9000, d:{ n, flash:1100+len*160 } };
-    }
-    if(type==="reaction"){
-      return { type, task:"Tippe, sobald es grün wird.", limit:6000, d:{ delay:rInt(rng,1200,3200) } };
-    }
-    if(type==="math"){
-      const a=rInt(rng,2,20), b=rInt(rng,2,20), op=pick(rng,["+","−","×"]);
-      const ans = op==="+"? a+b : op==="−"? a-b : a*b;
-      const wrong=new Set();
-      while(wrong.size<3){ const w=ans + rInt(rng,1,9)*(rng()<.5?-1:1); if(w!==ans) wrong.add(w); }
-      return { type, task:"Wie viel ist das?", limit:8000, d:{ q:a+" "+op+" "+b, ans, opts:shuffle(rng,[ans,...wrong]) } };
-    }
-    if(type==="color"){
-      const word = pick(rng, COLORS);
-      let ink = pick(rng, COLORS);
-      if(ink.h===word.h) ink = COLORS[(COLORS.indexOf(ink)+1)%COLORS.length];
-      const set=new Set([ink]); while(set.size<4) set.add(pick(rng,COLORS));
-      return { type, task:"Tippe die Farbe, nicht das Wort.", limit:8000, d:{ word:word.n, ink, opts:shuffle(rng,Array.from(set)) } };
-    }
-    if(type==="words"){
-      const letter = pick(rng, Object.keys(WORDS));
-      const bank = WORDS[letter];
-      const good = pickN(rng, bank.filter(w=>w[0]===letter), 5);
-      const bad  = pickN(rng, bank.filter(w=>w[0]!==letter), 3);
-      return { type, task:"Finde alle Wörter mit „"+letter+"“.", limit:10000, d:{ letter, chips:shuffle(rng,[...good,...bad]), good, need:good.length } };
-    }
-    const tiles = pickN(rng, TILE_HEX, 9);
-    const idx = rInt(rng,0,8);
-    const after = tiles.slice();
-    after[idx] = pick(rng, TILE_HEX.filter(c=>c!==tiles[idx]));
-    return { type:"observation", task:"Was hat sich verändert?", limit:8000, d:{ before:tiles, after, idx, flash:1800 } };
-  }
-  function scoreOf(ok, ms, limit){
-    if(!ok) return 0;
-    return Math.round(200 + 800*clamp(1-(ms/limit),0,1));
-  }
-  function botScore(id, key, i, skill){
-    const rng = rngOf("b:"+id+":"+key+":"+i);
-    if(rng() > (.55 + skill*.4)) return 0;
-    return Math.round(clamp(250 + rng()*650*skill + rng()*80, 80, 1000));
-  }
-
-  /* ---------- navigation ---------- */
-  const SCREENS=["home","duels","modes","board","profile","shop","play","results"];
-  function show(name){
-    SCREENS.forEach(s=>{ const el=$("screen-"+s); if(el) el.hidden = (s!==name); });
-    document.querySelectorAll(".navbtn").forEach(b=> b.classList.toggle("active", b.dataset.screen===name));
-    const playing = (name==="play");
-    $("content").classList.toggle("stage-mode", playing);
-    document.querySelector(".nav").hidden = playing;
-    document.querySelector(".topbar").hidden = playing;
-    $("content").scrollTop = 0;
-  }
-  document.querySelectorAll(".navbtn").forEach(b=>{
-    b.addEventListener("click", ()=>{
-      const t=b.dataset.screen; show(t);
-      if(t==="duels") renderDuels();
-      if(t==="modes") renderModes();
-      if(t==="board") renderBoard();
-      if(t==="profile") renderProfile();
-      if(t==="home") renderHome();
-    });
-  });
-  $("coinPill").addEventListener("click", ()=>{ show("shop"); renderShop(); });
-  $("btnShop").addEventListener("click", ()=>{ show("shop"); renderShop(); });
-
-  let toastT=null;
-  function toast(msg, miss){
-    const el=$("toast");
-    el.textContent=msg;
-    el.classList.toggle("miss", !!miss);
-    el.classList.add("show");
-    clearTimeout(toastT);
-    toastT=setTimeout(()=> el.classList.remove("show"), 1000);
-  }
-
-  /* ---------- header + home ---------- */
-  function renderHeader(){
-    $("hdrStreak").textContent = S.streak.count;
-    $("hdrCoins").textContent = S.profile.coins;
-  }
-  function today(){
-    const k=todayKey();
-    if(!S.history[k]) S.history[k]={ done:false, score:0, slots:0 };
-    return S.history[k];
-  }
-  function renderHome(){
-    const d=new Date();
-    const months=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
-    $("dateTag").textContent = d.getDate()+". "+months[d.getMonth()];
-
-    const t=today();
-    const slots=$("slots"); slots.innerHTML="";
-    for(let i=0;i<5;i++){
-      const el=document.createElement("div");
-      el.className="slot"+(i<t.slots?" done":"");
-      el.innerHTML = i<t.slots ? (i+1) : (i+1);
-      slots.appendChild(el);
-    }
-    if(t.done){
-      $("heroTitle").innerHTML="Heute<br>geschafft";
-      $("heroSub").textContent = t.score.toLocaleString("de-DE")+" Punkte geholt. Morgen gibt es neue Challenges.";
-      $("btnStart").textContent="Ergebnis ansehen";
-    } else if(t.slots>0){
-      $("heroTitle").innerHTML="Noch "+(5-t.slots)+"<br>übrig";
-      $("heroSub").textContent="Du bist mittendrin. Weiter geht's.";
-      $("btnStart").textContent="Weiterspielen";
-    } else {
-      $("heroTitle").innerHTML="5 neue<br>Challenges";
-      $("heroSub").textContent="Alle spielen heute dieselben Aufgaben. Schnell sein bringt mehr Punkte.";
-      $("btnStart").textContent="Duell starten";
-    }
-
-    $("streakNum").textContent = S.streak.count;
-    $("streakHint").textContent = S.streak.count===0 ? "Heute spielen startet deine Serie"
-      : S.streak.count<7 ? "Noch "+(7-S.streak.count)+" Tage bis 🔥 7 Tage"
-      : S.streak.count<30 ? "Noch "+(30-S.streak.count)+" Tage bis 💎 30 Tage"
-      : "Alle Serien-Abzeichen geholt";
-
-    const wk=$("week"); wk.innerHTML="";
-    const labels=["M","D","M","D","F","S","S"];
-    const base=new Date();
-    const offset=(base.getDay()+6)%7;
-    for(let i=0;i<7;i++){
-      const day=new Date(base); day.setDate(base.getDate()-offset+i);
-      const key=dayKey(day);
-      const played = S.history[key] && S.history[key].slots>0;
-      const el=document.createElement("div");
-      el.className="day"+(played?" hit":"")+(key===todayKey()?" today":"");
-      el.innerHTML='<div class="dot">'+""+'</div><span>'+labels[i]+'</span>';
-      wk.appendChild(el);
-    }
-
-    const top=board("today").slice(0,3);
-    const wrap=$("topThree");
-    wrap.className="podium";
-    wrap.innerHTML="";
-    [1,0,2].forEach(idx=>{
-      const r=top[idx];
-      if(!r) return;
-      const place=idx+1;
-      const el=document.createElement("div");
-      el.className="pod p"+place+(r.me?" me":"");
-      el.innerHTML='<div class="pod-name">'+(r.me?"Du":r.name)+'</div>'+
-        '<div class="pod-score">'+r.score.toLocaleString("de-DE")+'</div>'+
-        '<div class="pod-block">'+place+'</div>';
-      wrap.appendChild(el);
-    });
-  }
-
-  $("btnStart").addEventListener("click", ()=>{
-    const t=today();
-    if(t.done){ showTodayResult(); return; }
-    const list = dailySet(todayKey()).slice(t.slots);
-    runSequence({
-      list, total:5, offset:t.slots,
-      onEach:(res)=>{ t.slots+=1; t.score+=res.score; save(); },
-      onDone:(sum, results)=>{
-        t.done=true; t.score=sum; save();
-        const perfect = results.every(r=>r.correct) && results.length>=5;
-        if(perfect && !S.badges.includes("perfect")){ S.badges.push("perfect"); }
-        const rw = grantRewards(sum);
-        resultsDaily(sum, results, rw);
-      }
-    });
-  });
-
-  function showTodayResult(){
-    const t=today();
-    $("resVs").hidden=true;
-    $("resBreakWrap").hidden=true;
-    $("resLabel").textContent="Heute";
-    $("resBig").textContent=t.score.toLocaleString("de-DE");
-    $("resBig").classList.remove("win");
-    $("resSub").textContent="Punkte";
-    $("resCoins").textContent="✓";
-    $("resXP").textContent="✓";
-    show("results");
-  }
-
-  /* ---------- runner ---------- */
-  let RUN=null, timerHandle=null, expireHandle=null;
-  function clearTimers(){
-    if(timerHandle){ clearTimeout(timerHandle); timerHandle=null; }
-    if(expireHandle){ clearTimeout(expireHandle); expireHandle=null; }
-  }
-
-  function runSequence(opts){
-    RUN = Object.assign({ i:0, results:[], sum:0 }, opts);
-    show("play");
-    const segs=$("segs"); segs.innerHTML="";
-    for(let i=0;i<RUN.total;i++){
-      const s=document.createElement("div"); s.className="seg"; s.innerHTML="<i></i>";
-      if(i < (RUN.offset||0)) s.querySelector("i").style.width="100%";
-      segs.appendChild(s);
-    }
-    next();
-  }
-  function next(){
-    clearTimers();
-    if(RUN.i >= RUN.list.length){ RUN.onDone(RUN.sum, RUN.results); return; }
-    const cfg=RUN.list[RUN.i];
-    const pos=(RUN.offset||0)+RUN.i;
-    $("stageCount").textContent = (pos+1)+"/"+RUN.total;
-    play(cfg, (res)=>{
-      const seg=$("segs").children[pos];
-      if(seg){ seg.classList.toggle("miss", !res.correct); seg.querySelector("i").style.width="100%"; }
-      RUN.results.push(res); RUN.sum += res.score;
-      if(RUN.onEach) RUN.onEach(res);
-      toast(res.correct ? "+"+res.score : "Daneben", !res.correct);
-      RUN.i++;
-      setTimeout(next, 560);
-    });
-  }
-
-  function startTimer(limit, onExpire){
-    const bar=$("timer"), i=bar.querySelector("i");
-    bar.classList.remove("hot");
-    i.style.transition="none"; i.style.width="100%";
-    requestAnimationFrame(()=>{ i.style.transition="width "+limit+"ms linear"; i.style.width="0%"; });
-    timerHandle=setTimeout(()=> bar.classList.add("hot"), limit*.6);
-    expireHandle=setTimeout(onExpire, limit);
-  }
-
-  function play(cfg, done){
-    const body=$("stageBody");
-    body.innerHTML="";
-    $("stageKind").textContent = KIND_LABEL[cfg.type];
-    $("stageTask").textContent = cfg.task;
-    let finished=false;
-    const t0=now();
-    function finish(ok, ms){
-      if(finished) return;
-      finished=true; clearTimers();
-      done({ correct:ok, ms, score:scoreOf(ok, ms, cfg.limit), type:cfg.type });
-    }
-
-    if(cfg.type==="memory"){
-      const big=document.createElement("div");
-      big.className="mega"; big.textContent=cfg.d.n;
-      body.appendChild(big);
-      startTimer(cfg.limit, ()=> finish(false, cfg.limit));
-      setTimeout(()=>{
-        if(finished) return;
-        body.innerHTML="";
-        const out=document.createElement("div"); out.className="mega small"; out.textContent="—";
-        const hint=document.createElement("div"); hint.className="hint"; hint.textContent="Zahl eintippen";
-        const pad=document.createElement("div"); pad.className="grid3";
-        let typed="";
-        for(let d=1; d<=9; d++) pad.appendChild(keyBtn(d));
-        pad.appendChild(keyBtn("⌫"));
-        pad.appendChild(keyBtn(0));
-        const spacer=document.createElement("div");
-        pad.appendChild(spacer);
-        function keyBtn(v){
-          const b=document.createElement("button");
-          b.className="opt key"; b.textContent=v;
-          b.addEventListener("click", ()=>{
-            if(finished) return;
-            if(v==="⌫"){ typed=typed.slice(0,-1); }
-            else if(typed.length < cfg.d.n.length){ typed += v; }
-            out.textContent = typed || "—";
-            if(typed.length===cfg.d.n.length) finish(typed===cfg.d.n, now()-t0);
-          });
-          return b;
-        }
-        body.appendChild(hint); body.appendChild(out); body.appendChild(pad);
-      }, cfg.d.flash);
-
-    } else if(cfg.type==="reaction"){
-      const zone=document.createElement("div");
-      zone.className="tapzone wait";
-      zone.innerHTML="<span>WARTE</span>";
-      body.appendChild(zone);
-      let goAt=0;
-      const go=setTimeout(()=>{
-        if(finished) return;
-        zone.className="tapzone go"; zone.innerHTML="<span>JETZT!</span>"; goAt=now();
-      }, cfg.d.delay);
-      zone.addEventListener("click", ()=>{
-        if(finished) return;
-        if(!goAt){
-          clearTimeout(go);
-          zone.className="tapzone bust"; zone.innerHTML="<span>ZU FRÜH</span>";
-          finish(false, cfg.limit);
-        } else {
-          finish(true, clamp(now()-goAt, 0, cfg.limit));
-        }
-      });
-      expireHandle=setTimeout(()=>{ clearTimeout(go); finish(false, cfg.limit); }, cfg.d.delay+cfg.limit);
-
-    } else if(cfg.type==="math"){
-      const q=document.createElement("div"); q.className="mega"; q.textContent=cfg.d.q;
-      body.appendChild(q);
-      const grid=document.createElement("div"); grid.className="grid2";
-      cfg.d.opts.forEach(o=>{
-        const b=document.createElement("button"); b.className="opt"; b.textContent=o;
-        b.addEventListener("click", ()=>{
-          if(finished) return;
-          const ok = o===cfg.d.ans;
-          b.classList.add(ok?"right":"wrong");
-          finish(ok, now()-t0);
-        });
-        grid.appendChild(b);
-      });
-      body.appendChild(grid);
-      startTimer(cfg.limit, ()=> finish(false, cfg.limit));
-
-    } else if(cfg.type==="color"){
-      const w=document.createElement("div");
-      w.className="mega small"; w.textContent=cfg.d.word; w.style.color=cfg.d.ink.h;
-      body.appendChild(w);
-      const grid=document.createElement("div"); grid.className="grid2";
-      cfg.d.opts.forEach(o=>{
-        const sw=document.createElement("div"); sw.className="swatch"; sw.style.background=o.h;
-        sw.addEventListener("click", ()=>{
-          if(finished) return;
-          const ok = o.h===cfg.d.ink.h;
-          sw.classList.add(ok?"right":"wrong");
-          finish(ok, now()-t0);
-        });
-        grid.appendChild(sw);
-      });
-      body.appendChild(grid);
-      startTimer(cfg.limit, ()=> finish(false, cfg.limit));
-
-    } else if(cfg.type==="words"){
-      const counter=document.createElement("div");
-      counter.className="hint"; counter.textContent="0 / "+cfg.d.need;
-      body.appendChild(counter);
-      const wrap=document.createElement("div"); wrap.className="chips";
-      let got=0;
-      cfg.d.chips.forEach(word=>{
-        const c=document.createElement("button"); c.className="wchip"; c.textContent=word;
-        c.addEventListener("click", ()=>{
-          if(finished || c.classList.contains("got") || c.classList.contains("bad")) return;
-          if(cfg.d.good.includes(word)){
-            c.classList.add("got"); got++;
-            counter.textContent = got+" / "+cfg.d.need;
-            if(got>=cfg.d.need) finish(true, now()-t0);
-          } else {
-            c.classList.add("bad");
-          }
-        });
-        wrap.appendChild(c);
-      });
-      body.appendChild(wrap);
-      startTimer(cfg.limit, ()=> finish(got>=cfg.d.need, cfg.limit));
-
-    } else {
-      const grid=document.createElement("div"); grid.className="tiles";
-      cfg.d.before.forEach(c=>{
-        const t=document.createElement("div"); t.className="tile"; t.style.background=c; grid.appendChild(t);
-      });
-      const hint=document.createElement("div"); hint.className="hint"; hint.textContent="Einprägen…";
-      body.appendChild(grid); body.appendChild(hint);
-      setTimeout(()=>{
-        if(finished) return;
-        grid.innerHTML="";
-        for(let i=0;i<9;i++){ const t=document.createElement("div"); t.className="tile blank"; grid.appendChild(t); }
-        hint.textContent="…";
-        setTimeout(()=>{
-          if(finished) return;
-          grid.innerHTML=""; hint.textContent="Welches ist neu?";
-          const t1=now();
-          cfg.d.after.forEach((c,i)=>{
-            const t=document.createElement("div"); t.className="tile"; t.style.background=c;
-            t.addEventListener("click", ()=>{
-              if(finished) return;
-              const ok = i===cfg.d.idx;
-              t.classList.add(ok?"right":"wrong");
-              finish(ok, now()-t1);
-            });
-            grid.appendChild(t);
-          });
-          startTimer(cfg.limit, ()=> finish(false, cfg.limit));
-        }, 700);
-      }, cfg.d.flash);
-    }
-  }
-
-  /* ---------- rewards ---------- */
-  function addXP(n){
-    S.profile.xp += n;
-    let need = S.profile.level*100;
-    while(S.profile.xp >= need){
-      S.profile.xp -= need; S.profile.level++; need = S.profile.level*100;
-      toast("Level "+S.profile.level+"!");
-    }
-  }
-  function bumpStreak(){
-    const k=todayKey();
-    if(S.streak.last===k) return;
-    const y=new Date(); y.setDate(y.getDate()-1);
-    S.streak.count = (S.streak.last===dayKey(y)) ? S.streak.count+1 : 1;
-    S.streak.last=k;
-    if(S.streak.count > S.profile.longestStreak) S.profile.longestStreak=S.streak.count;
-  }
-  function grantRewards(score){
-    const coins=Math.round(score/25), xp=Math.round(score/10);
-    S.profile.coins += coins; addXP(xp); bumpStreak(); save();
-    checkBadges(); renderHeader();
-    return { coins, xp };
-  }
-  function checkBadges(){
-    BADGES.forEach(b=>{
-      if(S.badges.includes(b.id)) return;
-      const hit =
-        (b.id==="streak7" && S.streak.count>=7) ||
-        (b.id==="streak30" && S.streak.count>=30) ||
-        (b.id==="firstwin" && S.profile.wins>=1) ||
-        (b.id==="tenwins" && S.profile.wins>=10);
-      if(hit){ S.badges.push(b.id); popBadge(b); }
-    });
-    save();
-  }
-  function popBadge(b){
-    $("bdgIc").textContent=b.ic; $("bdgTitle").textContent=b.name; $("bdgDesc").textContent=b.desc;
-    $("badgeOverlay").hidden=false;
-  }
-  $("btnBdgClose").addEventListener("click", ()=> $("badgeOverlay").hidden=true);
-
-  /* ---------- results ---------- */
-  function renderBreakdown(results){
-    const el=$("resBreak"); el.innerHTML="";
-    results.forEach((r,i)=>{
-      const row=document.createElement("div");
-      row.className="brow "+(r.correct?"ok":"no");
-      row.innerHTML='<div class="idx">'+(i+1)+'</div>'+
-        '<div class="knd">'+KIND_LABEL[r.type]+'</div>'+
-        '<div class="tm">'+(r.ms/1000).toFixed(1)+'s</div>'+
-        '<div class="pts">'+(r.correct? r.score : "—")+'</div>';
-      el.appendChild(row);
-    });
-  }
-  function resultsDaily(sum, results, rw){
-    $("resVs").hidden=true;
-    $("resBreakWrap").hidden=false;
-    $("resLabel").textContent="Daily Duel";
-    $("resBig").textContent=sum.toLocaleString("de-DE");
-    $("resBig").classList.remove("win");
-    $("resSub").textContent="Punkte heute";
-    renderBreakdown(results);
-    $("resCoins").textContent="+"+rw.coins;
-    $("resXP").textContent="+"+rw.xp;
-    show("results");
-  }
-  $("btnResDone").addEventListener("click", ()=>{ show("home"); renderHome(); renderHeader(); });
-
-  /* ---------- duels ---------- */
-  function renderDuels(){
-    const list=$("friends"); list.innerHTML="";
-    FRIENDS.forEach(f=>{
-      const el=document.createElement("div");
-      el.className="item";
-      el.innerHTML='<div class="ava">'+f.ava+'</div><div class="meta"><div class="nm">'+f.name+'</div><div class="sb">wartet auf dich</div></div>';
-      const b=document.createElement("button");
-      b.className="btn btn-hot btn-sm"; b.textContent="Duell";
-      b.addEventListener("click", ()=> startDuel(f.id));
-      el.appendChild(b);
-      list.appendChild(el);
-    });
-    const log=$("duelLog"); log.innerHTML="";
-    if(!S.duels.length){ log.innerHTML='<div class="empty">Noch keine Duelle. Fordere jemanden heraus.</div>'; return; }
-    S.duels.slice().reverse().slice(0,8).forEach(d=>{
-      const el=document.createElement("div");
-      el.className="item";
-      el.innerHTML='<div class="ava">'+d.ava+'</div>'+
-        '<div class="meta"><div class="nm">'+d.name+'</div><div class="sb">'+d.my+' : '+d.opp+'</div></div>'+
-        '<div class="chip '+(d.won?"win":"loss")+'">'+(d.won?"Sieg":"Loss")+'</div>';
-      log.appendChild(el);
-    });
-  }
-  function startDuel(fid){
-    const f=FRIENDS.find(x=>x.id===fid);
-    const key=todayKey();
-    runSequence({
-      list: dailySet(key), total:5, offset:0,
-      onEach:()=>{},
-      onDone:(sum, results)=>{
-        const opp = results.reduce((a,_,i)=> a + botScore(f.id, key, i, f.skill), 0);
-        const won = sum >= opp;
-        const rw = grantRewards(sum);
-        if(won){ S.profile.wins++; S.profile.coins += 40; } else { S.profile.losses++; }
-        S.duels.push({ name:f.name, ava:f.ava, my:sum, opp, won });
-        save(); checkBadges(); renderHeader();
-        $("resVs").hidden=false;
-        $("resBreakWrap").hidden=false;
-        $("resLabel").textContent="Duell gegen "+f.name;
-        $("resBig").textContent= won ? "SIEG" : "VERLOREN";
-        $("resBig").classList.toggle("win", won);
-        $("resSub").textContent= won ? "+40 Bonus-Coins" : "Nächstes Mal";
-        $("resMyAva").textContent=S.profile.equipped.avatar;
-        $("resMyScore").textContent=sum;
-        $("resOppAva").textContent=f.ava;
-        $("resOppName").textContent=f.name.toUpperCase();
-        $("resOppScore").textContent=opp;
-        renderBreakdown(results);
-        $("resCoins").textContent="+"+(rw.coins+(won?40:0));
-        $("resXP").textContent="+"+rw.xp;
-        show("results");
-      }
-    });
-  }
-
-  /* ---------- modes ---------- */
-  const MODES=[
-    {id:"speed",ic:"⚡",name:"Speed Duel",desc:"10 Aufgaben. Wer ist schneller durch?",col:"var(--accent)"},
-    {id:"sudden",ic:"💀",name:"Sudden Death",desc:"Ein Fehler und raus. Wie weit kommst du?",col:"var(--hot)"},
-    {id:"team",ic:"🤝",name:"Team Duel",desc:"2 gegen 2 mit Teammate.",col:"#2EE6FF"},
-    {id:"endless",ic:"♾️",name:"Endless",desc:"3 Leben, so lange wie möglich.",col:"var(--gold)"}
-  ];
-  function renderModes(){
-    const wrap=$("modes"); wrap.innerHTML="";
-    MODES.forEach(m=>{
-      const best = m.id==="sudden"? S.modeBest.sudden : m.id==="endless"? S.modeBest.endless : null;
-      const el=document.createElement("div");
-      el.className="mode";
-      el.innerHTML='<div class="mi">'+m.ic+'</div>'+
-        '<div class="mt"><div class="nm">'+m.name+'</div><div class="ds">'+m.desc+'</div>'+
-        (best? '<div class="best">BEST: '+best+'</div>':'')+'</div>'+
-        '<div style="font-size:20px; color:var(--text-dim);">›</div>';
-      el.addEventListener("click", ()=> startMode(m.id));
-      wrap.appendChild(el);
-    });
-  }
-  function randomChallenge(){ return build(pick(Math.random, TYPES), Math.random); }
-
-  function startMode(id){
-    if(id==="speed"){
-      runSequence({
-        list: Array.from({length:10}, randomChallenge), total:10, offset:0,
-        onEach:()=>{},
-        onDone:(sum, results)=>{
-          const mine = results.reduce((a,r)=>a+r.ms,0);
-          const bot = mine*(0.85+Math.random()*0.3);
-          const won = mine<=bot;
-          const rw=grantRewards(sum);
-          if(won) S.profile.wins++; else S.profile.losses++;
-          save(); checkBadges(); renderHeader();
-          $("resVs").hidden=true; $("resBreakWrap").hidden=false;
-          $("resLabel").textContent="Speed Duel";
-          $("resBig").textContent=(mine/1000).toFixed(1)+"s";
-          $("resBig").classList.toggle("win", won);
-          $("resSub").textContent = won ? "Schneller als der Bot ("+(bot/1000).toFixed(1)+"s)" : "Bot war schneller ("+(bot/1000).toFixed(1)+"s)";
-          renderBreakdown(results);
-          $("resCoins").textContent="+"+rw.coins; $("resXP").textContent="+"+rw.xp;
-          show("results");
-        }
-      });
-    } else if(id==="team"){
-      const mate=pick(Math.random, FRIENDS);
-      runSequence({
-        list: Array.from({length:5}, randomChallenge), total:5, offset:0,
-        onEach:()=>{},
-        onDone:(sum, results)=>{
-          const mateScore=Math.round(sum*(0.6+Math.random()*0.5));
-          const team=sum+mateScore;
-          const opp=Math.round(team*(0.75+Math.random()*0.5));
-          const won=team>=opp;
-          const rw=grantRewards(sum);
-          if(won) S.profile.wins++; else S.profile.losses++;
-          save(); checkBadges(); renderHeader();
-          $("resVs").hidden=false; $("resBreakWrap").hidden=false;
-          $("resLabel").textContent="Team Duel";
-          $("resBig").textContent= won ? "TEAM WINS" : "TEAM LOSS";
-          $("resBig").classList.toggle("win", won);
-          $("resSub").textContent="mit "+mate.name+" · simuliert";
-          $("resMyAva").textContent=S.profile.equipped.avatar;
-          $("resMyScore").textContent=team;
-          $("resOppAva").textContent="🤖";
-          $("resOppName").textContent="GEGNER";
-          $("resOppScore").textContent=opp;
-          renderBreakdown(results);
-          $("resCoins").textContent="+"+rw.coins; $("resXP").textContent="+"+rw.xp;
-          show("results");
-        }
-      });
-    } else {
-      endurance(id);
-    }
-  }
-
-  function endurance(mode){
-    let cleared=0, lives = mode==="sudden"?1:3, sum=0;
-    const results=[];
-    show("play");
-    $("segs").innerHTML="";
-    function step(){
-      $("stageCount").textContent = mode==="sudden" ? "Runde "+(cleared+1) : lives+" Leben";
-      play(randomChallenge(), (r)=>{
-        results.push(r);
-        if(r.correct){
-          cleared++; sum+=r.score;
-          toast("+"+r.score);
-          setTimeout(step, 480);
-        } else {
-          lives--;
-          if(lives<=0){
-            const rw=grantRewards(sum);
-            if(mode==="sudden" && cleared>S.modeBest.sudden) S.modeBest.sudden=cleared;
-            if(mode==="endless" && cleared>S.modeBest.endless) S.modeBest.endless=cleared;
-            save(); renderHeader();
-            $("resVs").hidden=true; $("resBreakWrap").hidden=false;
-            $("resLabel").textContent = mode==="sudden"?"Sudden Death":"Endless";
-            $("resBig").textContent=cleared;
-            $("resBig").classList.add("win");
-            $("resSub").textContent="Challenges geschafft · "+sum.toLocaleString("de-DE")+" Punkte";
-            renderBreakdown(results.slice(-6));
-            $("resCoins").textContent="+"+rw.coins; $("resXP").textContent="+"+rw.xp;
-            show("results");
-          } else {
-            toast("Noch "+lives+" Leben", true);
-            setTimeout(step, 620);
-          }
-        }
-      });
-    }
-    step();
-  }
-
-  /* ---------- leaderboard ---------- */
-  let scope="today";
-  $("boardTabs").addEventListener("click",(e)=>{
-    const b=e.target.closest(".tab"); if(!b) return;
-    document.querySelectorAll("#boardTabs .tab").forEach(t=>t.classList.remove("active"));
-    b.classList.add("active"); scope=b.dataset.scope; renderBoard();
-  });
-  function board(sc){
-    const key=todayKey();
-    const mine=today().score||0;
-    if(sc==="friends"){
-      const rows=FRIENDS.map(f=>({
-        name:f.name, ava:f.ava,
-        score: dailySet(key).reduce((a,_,i)=> a+botScore(f.id,key,i,f.skill), 0), me:false
-      }));
-      rows.push({ name:S.profile.username, ava:S.profile.equipped.avatar, score:mine, me:true });
-      return rows.sort((a,b)=>b.score-a.score);
-    }
-    const rng=rngOf("lb:"+sc+":"+key);
-    const n = sc==="today"?24 : sc==="de"?40 : 60;
-    const rows=[];
-    for(let i=0;i<n;i++){
-      const s = sc==="world" ? rInt(rng,6000,9900) : sc==="de" ? rInt(rng,4000,8800) : rInt(rng,500,4200);
-      rows.push({ name:pick(rng,NAMES)+rInt(rng,1,99), ava:"", score:s, me:false });
-    }
-    rows.push({ name:S.profile.username, ava:S.profile.equipped.avatar, score:mine, me:true });
-    return rows.sort((a,b)=>b.score-a.score);
-  }
-  function renderBoard(){
-    const rows=board(scope), wrap=$("board");
-    wrap.innerHTML="";
-    const myIdx=rows.findIndex(r=>r.me);
-    rows.slice(0,14).forEach((r,i)=>{
-      const el=document.createElement("div");
-      el.className="item"+(r.me?" me":"");
-      el.innerHTML='<div class="rank'+(i<3?" top":"")+'">'+(i+1)+'</div>'+
-        (r.ava? '<div class="ava">'+r.ava+'</div>':'')+
-        '<div class="meta"><div class="nm">'+(r.me?"Du":r.name)+'</div></div>'+
-        '<div class="score-val">'+r.score.toLocaleString("de-DE")+'</div>';
-      wrap.appendChild(el);
-    });
-    if(myIdx>13){
-      const r=rows[myIdx];
-      const el=document.createElement("div");
-      el.className="item me"; el.style.marginTop="8px";
-      el.innerHTML='<div class="rank">'+(myIdx+1)+'</div><div class="meta"><div class="nm">Du</div></div>'+
-        '<div class="score-val">'+r.score.toLocaleString("de-DE")+'</div>';
-      wrap.appendChild(el);
-    }
-  }
-
-  /* ---------- profile ---------- */
-  function titleOf(id){
-    for(const c in SHOP){ const f=SHOP[c].find(i=>i.id===id); if(f) return f.name; }
-    return "Neuling";
-  }
-  function renderProfile(){
-    const p=S.profile;
-    $("profAva").textContent=p.equipped.avatar||"🙂";
-    $("profName").value=p.username;
-    $("profTitle").textContent = p.equipped.title ? titleOf(p.equipped.title) : "Neuling";
-    $("lvlBadge").textContent="LVL "+p.level;
-    const need=p.level*100, pct=clamp((p.xp/need)*100,0,100);
-    $("lvlRing").style.background="conic-gradient(var(--gold) "+pct+"%, var(--ring) 0)";
-    $("stWins").textContent=p.wins;
-    $("stLoss").textContent=p.losses;
-    $("stStreak").textContent=p.longestStreak;
-    $("stXP").textContent=p.xp;
-
-    const wrap=$("badges"); wrap.innerHTML="";
-    BADGES.forEach(b=>{
-      const owned=S.badges.includes(b.id);
-      const el=document.createElement("div");
-      el.className="bdg"+(owned?"":" locked");
-      el.innerHTML='<div class="nm">'+b.name+'</div>';
-      wrap.appendChild(el);
-    });
-  }
-  $("profName").addEventListener("change",(e)=>{
-    S.profile.username=(e.target.value||"Player").slice(0,14); save(); renderBoard();
-  });
-
-  /* ---------- shop ---------- */
-  let cat="avatar";
-  $("shopTabs").addEventListener("click",(e)=>{
-    const b=e.target.closest(".tab"); if(!b) return;
-    document.querySelectorAll("#shopTabs .tab").forEach(t=>t.classList.remove("active"));
-    b.classList.add("active"); cat=b.dataset.cat; renderShop();
-  });
-  function renderShop(){
-    $("shopCoins").textContent=S.profile.coins;
-    const grid=$("shopGrid"); grid.innerHTML="";
-    SHOP[cat].forEach(item=>{
-      const owned=S.inventory.includes(item.id);
-      const on = cat==="avatar" ? S.profile.equipped.avatar===item.pv : S.profile.equipped[cat]===item.id;
-      const el=document.createElement("div");
-      el.className="sitem"+(on?" on":"");
-      el.innerHTML='<div class="pv">'+item.pv+'</div><div class="nm">'+item.name+'</div>'+
-        '<div class="pr">'+(owned?"DEIN":item.price+" Coins")+'</div>';
-      const b=document.createElement("button");
-      b.className="btn btn-sm btn-block "+(on?"btn-ghost":"btn-lime");
-      b.textContent = on ? "Aktiv" : owned ? "Anlegen" : "Kaufen";
-      b.disabled = on;
-      b.addEventListener("click", ()=> buy(item));
-      el.appendChild(b);
-      grid.appendChild(el);
-    });
-  }
-  function buy(item){
-    const owned=S.inventory.includes(item.id);
-    if(!owned){
-      if(S.profile.coins < item.price){ toast("Zu wenig Coins", true); return; }
-      S.profile.coins -= item.price; S.inventory.push(item.id);
-      toast(item.name+" gekauft");
-    }
-    if(cat==="avatar") S.profile.equipped.avatar=item.pv;
-    else S.profile.equipped[cat]=item.id;
-    save(); renderHeader(); renderShop();
-  }
-
-  /* ---------- daily reward ---------- */
-  function dailyReward(){
-    const k=todayKey();
-    if(S.lastReward===k) return;
-    const amount = clamp(30 + Math.max(0,S.streak.count)*8, 30, 300);
-    S.profile.coins += amount; S.lastReward=k; save();
-    $("rewardAmount").textContent="+"+amount;
-    $("rewardStreak").textContent = S.streak.count>0 ? "Coins · Tag "+S.streak.count+" deiner Serie" : "Coins für heute";
-    $("rewardOverlay").hidden=false;
-  }
-  $("btnRewardClose").addEventListener("click", ()=>{ $("rewardOverlay").hidden=true; renderHeader(); });
-
-  /* ---------- boot ---------- */
-  function boot(){
-    renderHeader(); renderHome(); renderDuels(); renderModes(); renderBoard(); renderProfile(); renderShop();
-    show("home");
-    setTimeout(dailyReward, 400);
-  }
-  const hot = window.claude && window.claude.hot;
-  if(hot && hot.data && hot.data.S){ try{ Object.assign(S, hot.data.S); }catch(e){} }
-  if(hot && typeof hot.snapshot==="function"){ hot.snapshot(()=>({ S })); }
-  if(hot && hot.ready){ hot.ready(boot); } else { boot(); }
-})();
-</script>
+<script src="game.js"></script>
 </body>
-
 </html>
+
+# Daily Duel
+
+Jeden Tag fünf Challenges — für alle Spieler dieselben. Punkte gibt es nach Tempo,
+dazu Streaks, Coins, Duelle gegen Freunde und ein paar Spezialmodi.
+
+Prototyp als Web-App. Läuft ohne Server, ohne Build-Schritt, ohne Abhängigkeiten.
+
+## Ausprobieren
+
+`index.html` im Browser öffnen. Das war's.
+
+Für die Handy-Ansicht: Entwicklertools öffnen (F12) und die Geräte-Ansicht einschalten.
+
+## Auf GitHub veröffentlichen
+
+1. Neues Repository anlegen, zum Beispiel `daily-duel`.
+2. Die vier Dateien hochladen: `index.html`, `style.css`, `game.js`, `README.md`.
+3. Im Repository auf **Settings → Pages** gehen.
+4. Unter **Source** den Branch `main` und den Ordner `/ (root)` wählen, dann **Save**.
+5. Nach ein bis zwei Minuten liegt die App unter `https://DEINNAME.github.io/daily-duel/`.
+
+Per Kommandozeile:
+
+```bash
+git init
+git add .
+git commit -m "Daily Duel: erster Prototyp"
+git branch -M main
+git remote add origin https://github.com/DEINNAME/daily-duel.git
+git push -u origin main
+```
+
+## Aufbau
+
+| Datei | Inhalt |
+| --- | --- |
+| `index.html` | Struktur aller Screens: Home, Duelle, Modi, Rangliste, Profil, Shop, Spiel, Ergebnis |
+| `style.css` | Farben als CSS-Variablen ganz oben, darunter die Bausteine nach Bereichen sortiert |
+| `game.js` | Spiellogik: Challenges, Punkte, Streaks, Coins, Duelle, Ranglisten |
+
+## Wie das Spiel funktioniert
+
+**Gleiche Challenges für alle.** Aus dem Datum wird ein Startwert berechnet, aus dem ein
+Zufallsgenerator die fünf Challenges des Tages erzeugt. Gleicher Tag heißt gleicher
+Startwert heißt gleiche Aufgaben — ganz ohne Server. Zu finden in `dailySet()` und `build()`.
+
+**Punkte.** Richtig beantwortet gibt zwischen 200 und 1.000 Punkte, je nachdem, wie viel
+Zeitlimit übrig war. Falsch gibt null. Siehe `scoreOf()`.
+
+**Challenge-Arten.** Memory, Reaction, Math, Color, Words und Observation. Jede Art hat
+in `build()` ihre Erzeugung und in `play()` ihre Darstellung.
+
+**Spielstand.** Liegt im Browserspeicher unter dem Schlüssel `dd_v2`. Zum Zurücksetzen in der
+Konsole `localStorage.removeItem('dd_v2')` eingeben und neu laden.
+
+## Was hier nur simuliert ist
+
+Der Prototyp läuft ohne Backend. Deshalb sind folgende Dinge nachgestellt:
+
+- **Freunde und Duelle** — die Gegner sind Bots mit festen Stärkewerten
+- **Ranglisten** — erfunden, aber pro Tag stabil
+- **Team Duel** — Mitspieler und Gegner werden berechnet, nicht gespielt
+- **Tagesreset** — richtet sich nach der Uhr des Geräts, nicht nach einem Server
+
+Für eine echte App braucht es Accounts, eine Datenbank und serverseitige Punkteprüfung.
+
+## Selbst anpassen
+
+- **Farben** — die Variablen am Anfang von `style.css` (`--accent`, `--gold`, `--text`)
+- **Neue Challenge-Art** — in `TYPES` eintragen, in `build()` erzeugen, in `play()` darstellen
+- **Schwierigkeit** — die `limit`-Werte in `build()` sind die Zeitlimits in Millisekunden
+- **Shop-Inhalte** — das Objekt `SHOP` in `game.js`
+
+/* Grundlage: Vollbild auf dem Handy, Ränder für Notch und Home-Leiste */
+:root{
+  color-scheme: light;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+html, body{ margin:0; }
+img{ max-width:100%; }
+[hidden]{ display:none !important; }
+
+  /* ============ TOKENS ============ */
+:root{
+  --bg:#FAF9F6; --surface:#FFFFFF; --surface-2:#F3F0E9; --line:#E7E2D7; --line-soft:#EFEBE2;
+  --text:#171614; --text-dim:#7A756A;
+  --accent:#171614; --accent-ink:#FAF9F6;
+  --gold:#9C7C3C; --gold-soft:#C9A96A;
+  --good:#2E7D5B; --bad:#A8443B;
+  --ring:rgba(23,22,20,.09);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F0E0C; --surface:#171613; --surface-2:#211F1A; --line:#2E2B25; --line-soft:#241F1A;
+    --text:#F3F0E9; --text-dim:#948E81;
+    --accent:#C9A96A; --accent-ink:#14130F;
+    --gold:#C9A96A; --gold-soft:#E0CDA4;
+    --good:#4FBF8B; --bad:#D9736A;
+    --ring:rgba(243,240,233,.1);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F0E0C; --surface:#171613; --surface-2:#211F1A; --line:#2E2B25; --line-soft:#241F1A;
+  --text:#F3F0E9; --text-dim:#948E81;
+  --accent:#C9A96A; --accent-ink:#14130F;
+  --gold:#C9A96A; --gold-soft:#E0CDA4;
+  --good:#4FBF8B; --bad:#D9736A;
+  --ring:rgba(243,240,233,.1);
+  color-scheme: dark;
+}
+
+html,body{ height:100%; }
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:'Instrument Sans', ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight:400; font-size:14px; line-height:1.55;
+  font-variant-numeric: tabular-nums;
+  display:flex; justify-content:center;
+  -webkit-user-select:none; -moz-user-select:none; user-select:none;
+  -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none;
+}
+*{ box-sizing:border-box; }
+input, textarea{ -webkit-user-select:text; user-select:text; }
+::selection{ background:transparent; }
+input::selection{ background:var(--surface-2); }
+
+h1,h2,h3{ margin:0; font-weight:400; letter-spacing:-.01em; text-wrap:balance; }
+.serif, .disp, .hero h2, .mega, .result-big, .stage-kind, .modal h3, .modal .amount,
+.vs-side .sc, .stat .v, .lvl-badge, .result-top .result-big{
+  font-family:'Instrument Serif', Georgia, 'Times New Roman', serif;
+  font-weight:400; letter-spacing:-.01em;
+}
+button{ font-family:inherit; color:inherit; }
+button:focus-visible, input:focus-visible{ outline:1.5px solid var(--gold); outline-offset:3px; }
+@media (prefers-reduced-motion: reduce){ *{ animation-duration:.001ms !important; transition-duration:.001ms !important; } }
+
+.app{ width:100%; max-width:420px; min-height:100%; display:flex; flex-direction:column; background:var(--bg); }
+
+/* ============ TOP BAR ============ */
+.topbar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:30;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 22px 14px; background:var(--bg);
+}
+.logo{ font-size:11.5px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; }
+.logo em{ font-style:normal; color:var(--gold); }
+.pills{ display:flex; gap:18px; align-items:baseline; }
+.pill{ display:flex; align-items:baseline; gap:6px; font-size:12px; }
+.pill .lbl{ font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--text-dim); }
+.pill .num{ font-size:13px; font-weight:600; color:var(--text); }
+.pill.coins{ cursor:pointer; }
+.pill.coins .num{ color:var(--gold); }
+
+/* ============ CONTENT ============ */
+.content{ flex:1; overflow-y:auto; padding:8px 22px calc(132px + env(safe-area-inset-bottom,0px)); }
+.content.stage-mode{ padding:0; display:flex; flex-direction:column; }
+.content.stage-mode > .screen{ flex:1; display:flex; flex-direction:column; }
+.screen[hidden]{ display:none !important; }
+
+.eyebrow{
+  display:flex; align-items:center; gap:12px;
+  font-size:10px; font-weight:600; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--text-dim); margin:34px 0 14px;
+}
+.eyebrow::after{ content:""; flex:1; height:1px; background:var(--line); }
+.eyebrow:first-child{ margin-top:12px; }
+
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px; }
+.stack{ display:flex; flex-direction:column; }
+.row{ display:flex; align-items:center; gap:12px; }
+.row.between{ justify-content:space-between; }
+
+/* ============ BUTTONS ============ */
+.btn{
+  border:1px solid transparent; border-radius:12px; padding:15px 20px;
+  font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:opacity .15s ease;
+}
+.btn-lime, .btn-hot{ background:var(--accent); color:var(--accent-ink); }
+.btn-ghost{ background:transparent; color:var(--text); border-color:var(--line); }
+.btn:active{ opacity:.72; }
+.btn-block{ width:100%; }
+.btn-sm{ padding:9px 15px; font-size:10px; letter-spacing:.14em; }
+.btn[disabled]{ opacity:.32; cursor:not-allowed; }
+
+/* ============ HERO ============ */
+.hero{ padding:16px 0 6px; }
+.hero .tag{ font-size:10px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); }
+.hero h2{ font-size:38px; line-height:1.08; margin:14px 0 10px; }
+.hero p{ margin:0 0 26px; font-size:13.5px; color:var(--text-dim); max-width:32ch; line-height:1.6; }
+
+.slots{ display:flex; gap:1px; margin-bottom:26px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.slot{
+  flex:1; height:46px; display:flex; align-items:center; justify-content:center;
+  background:var(--bg); font-size:12px; color:var(--text-dim); letter-spacing:.06em;
+}
+.slot.done{ background:var(--accent); color:var(--accent-ink); }
+
+/* ============ STREAK WEEK ============ */
+.week{ display:flex; gap:5px; margin-top:20px; }
+.day{ flex:1; text-align:center; }
+.day .dot{ height:26px; border:1px solid var(--line); background:transparent; margin-bottom:6px; border-radius:10px; }
+.day.hit .dot{ background:var(--gold); border-color:var(--gold); }
+.day.today .dot{ border-color:var(--text); }
+.day span{ font-size:9.5px; color:var(--text-dim); letter-spacing:.08em; }
+
+/* ============ LIST ITEMS ============ */
+.item{ display:flex; align-items:center; gap:14px; padding:15px 0; border-bottom:1px solid var(--line); }
+.item:last-child{ border-bottom:none; }
+.ava{
+  width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  font-size:17px; background:var(--surface-2); flex-shrink:0;
+}
+.ava.lg{ width:58px; height:58px; font-size:26px; }
+.item .meta{ flex:1; min-width:0; }
+.item .nm{ font-weight:500; font-size:14px; }
+.item .sb{ font-size:11.5px; color:var(--text-dim); margin-top:2px; letter-spacing:.02em; }
+.rank{ width:24px; font-size:12px; color:var(--text-dim); flex-shrink:0; letter-spacing:.04em; }
+.rank.top{ color:var(--gold); font-weight:600; }
+.item.me .nm{ font-weight:700; }
+.score-val{ font-size:14px; font-weight:600; letter-spacing:-.01em; }
+
+.chip{ border-radius:999px; font-size:9.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border:1px solid var(--line); color:var(--text-dim); }
+.chip.win{ color:var(--gold); border-color:color-mix(in srgb, var(--gold) 45%, var(--line)); }
+
+/* ============ TABS ============ */
+.tabs{ display:flex; gap:26px; border-bottom:1px solid var(--line); }
+.tab{
+  padding:0 0 12px; font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--text-dim); background:none; border:none; border-bottom:1px solid transparent;
+  cursor:pointer; margin-bottom:-1px;
+}
+.tab.active{ color:var(--text); border-bottom-color:var(--gold); }
+
+/* ============ NAV ============ */
+.nav{
+  position:fixed; bottom:calc(16px + env(safe-area-inset-bottom,0px)); left:50%; transform:translateX(-50%);
+  width:calc(100% - 36px); max-width:384px; z-index:40; display:flex; gap:4px;
+  padding:6px; background:var(--surface);
+  border:1px solid var(--line); border-radius:20px;
+  box-shadow:0 8px 28px -14px rgba(23,22,20,.35);
+}
+.navbtn{
+  flex:1; background:none; border:none; cursor:pointer; padding:12px 2px;
+  border-radius:15px;
+  font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dim);
+  transition:opacity .12s ease;
+}
+.navbtn:active{ opacity:.65; }
+.navbtn .ic{ display:none; }
+.navbtn.active{ background:var(--accent); color:var(--accent-ink); }
+
+/* ============ STAGE (play) ============ */
+.stage{
+  background:var(--bg); color:var(--text); flex:1; min-height:100%;
+  display:flex; flex-direction:column;
+  padding:calc(20px + env(safe-area-inset-top,0px)) 22px calc(28px + env(safe-area-inset-bottom,0px));
+}
+.stage-head{ flex-shrink:0; }
+.segs{ display:flex; gap:4px; margin-bottom:24px; }
+.seg{ flex:1; height:2px; border-radius:2px; background:var(--line); overflow:hidden; }
+.seg > i{ display:block; height:100%; width:0; background:var(--gold); transition:width .3s ease; }
+.seg.miss > i{ background:var(--line); }
+
+.stage-meta{ display:flex; justify-content:space-between; align-items:baseline; }
+.stage-kind{ font-size:26px; }
+.stage-count{ font-size:10.5px; color:var(--text-dim); letter-spacing:.16em; text-transform:uppercase; }
+.stage-task{ font-size:13px; color:var(--text-dim); margin:6px 0 18px; }
+
+.timer{ height:3px; border-radius:3px; background:var(--line); overflow:hidden; }
+.timer > i{ display:block; height:100%; width:100%; background:var(--gold); border-radius:3px; }
+.timer.hot > i{ background:var(--bad); }
+
+.stage-body{
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:26px; text-align:center; padding:22px 0;
+}
+.mega{ font-size:72px; line-height:1; }
+.mega.small{ font-size:52px; }
+.hint{ font-size:10.5px; color:var(--text-dim); letter-spacing:.16em; text-transform:uppercase; }
+
+.tapzone{
+  width:100%; max-width:250px; aspect-ratio:1; border-radius:10px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
+}
+.tapzone.wait{ background:transparent; color:var(--text-dim); border:1px solid var(--line); }
+.tapzone.go{ background:var(--accent); color:var(--accent-ink); }
+.tapzone.bust{ background:transparent; border:1px solid var(--bad); color:var(--bad); }
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; }
+.grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; }
+.opt{
+  padding:19px 10px; border-radius:10px; cursor:pointer;
+  background:transparent; border:1px solid var(--line); color:var(--text);
+  font-family:'Instrument Serif', Georgia, serif; font-size:22px; transition:opacity .12s ease;
+}
+.opt:active{ opacity:.6; }
+.opt.right{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.opt.wrong{ border-color:var(--bad); color:var(--bad); }
+.key{ padding:15px 6px; font-size:20px; }
+
+.swatch{ height:72px; border-radius:10px; cursor:pointer; border:1px solid var(--line); }
+.swatch.right{ outline:1px solid var(--gold); outline-offset:3px; }
+.swatch.wrong{ opacity:.3; }
+
+.chips{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.wchip{
+  padding:11px 16px; border-radius:10px; cursor:pointer; font-size:13.5px;
+  background:transparent; border:1px solid var(--line); color:var(--text);
+}
+.wchip.got{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.wchip.bad{ opacity:.28; }
+
+.tiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; width:100%; max-width:236px; }
+.tile{ aspect-ratio:1; border-radius:10px; cursor:pointer; border:1px solid transparent; }
+.tile.right{ outline:1px solid var(--gold); outline-offset:3px; }
+.tile.wrong{ opacity:.3; }
+.tile.blank{ background:var(--surface-2) !important; }
+
+/* ============ RESULTS ============ */
+.result-top{ text-align:center; padding:44px 4px 14px; }
+.result-label{ font-size:10px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); }
+.result-big{ font-size:64px; line-height:1.05; margin:14px 0 6px; }
+.result-big.win{ color:var(--gold); }
+.result-sub{ font-size:12.5px; color:var(--text-dim); }
+
+.vs{ display:flex; align-items:center; gap:12px; }
+.vs-side{ flex:1; text-align:center; }
+.vs-side .sc{ font-size:30px; margin-top:10px; }
+.vs-mid{ font-size:9.5px; color:var(--text-dim); letter-spacing:.2em; text-transform:uppercase; }
+
+.breakdown{ display:flex; flex-direction:column; padding:2px 20px; }
+.brow{ display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--line); }
+.brow:last-child{ border-bottom:none; }
+.brow .idx{ font-size:11px; color:var(--text-dim); width:14px; }
+.brow .knd{ flex:1; font-size:13.5px; }
+.brow .tm{ font-size:11.5px; color:var(--text-dim); }
+.brow .pts{ font-size:13.5px; font-weight:600; width:50px; text-align:right; }
+.brow.ok .pts{ color:var(--text); }
+.brow.no .pts{ color:var(--text-dim); }
+
+.reward-row{ display:flex; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.reward-box{ flex:1; background:var(--bg); padding:20px 10px; text-align:center; }
+.reward-box .v{ font-family:'Instrument Serif',Georgia,serif; font-size:26px; }
+.reward-box .k{ font-size:9.5px; color:var(--text-dim); margin-top:4px; letter-spacing:.16em; text-transform:uppercase; }
+
+/* ============ PROFILE ============ */
+.prof-head{ text-align:center; padding:10px 0 6px; }
+.lvl-wrap{ position:relative; width:88px; height:88px; margin:0 auto 18px; }
+.lvl-ring{ position:absolute; inset:0; border-radius:50%; }
+.lvl-inner{
+  position:absolute; inset:3px; border-radius:50%; background:var(--bg);
+  display:flex; align-items:center; justify-content:center; font-size:30px; border:1px solid var(--line);
+}
+.lvl-badge{
+  position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
+  background:var(--bg); color:var(--gold); font-size:12px;
+  padding:1px 10px; border:1px solid var(--line); border-radius:999px; white-space:nowrap;
+}
+#profName{
+  text-align:center; font-family:'Instrument Serif',Georgia,serif; font-size:24px;
+  border:none; background:transparent; color:var(--text); width:100%; padding:4px 0;
+}
+#profTitle{ color:var(--gold) !important; }
+.stats{ display:grid; grid-template-columns:repeat(4,1fr); margin-top:22px; border-top:1px solid var(--line); padding-top:18px; }
+.stat{ text-align:center; }
+.stat .v{ font-size:22px; }
+.stat .k{ font-size:9.5px; color:var(--text-dim); margin-top:3px; letter-spacing:.12em; text-transform:uppercase; }
+
+.badges{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.bdg{ background:var(--bg); padding:18px 12px; text-align:center; }
+.bdg .ic{ font-size:20px; display:block; margin-bottom:8px; }
+.bdg .nm{ font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); }
+.bdg.locked{ opacity:.3; }
+
+/* ============ SHOP ============ */
+.shop-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.sitem{ background:var(--bg); padding:20px 14px; text-align:center; }
+.sitem.on{ background:var(--surface-2); }
+.sitem .pv{ font-size:26px; margin-bottom:10px; }
+.sitem .nm{ font-size:12.5px; }
+.sitem .pr{ font-size:10.5px; color:var(--gold); margin:6px 0 12px; letter-spacing:.1em; text-transform:uppercase; }
+
+/* ============ MODES ============ */
+.mode{ display:flex; align-items:center; gap:16px; padding:18px 0; cursor:pointer; border-bottom:1px solid var(--line); }
+.mode:last-child{ border-bottom:none; }
+.mode .mi{ width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; background:transparent !important; border:1px solid var(--line); color:var(--text) !important; }
+.mode .mt{ flex:1; }
+.mode .mt .nm{ font-size:14px; font-weight:600; letter-spacing:.02em; }
+.mode .mt .ds{ font-size:12px; color:var(--text-dim); margin-top:3px; }
+.mode .best{ font-size:10px; color:var(--gold); margin-top:4px; letter-spacing:.12em; text-transform:uppercase; }
+
+/* ============ OVERLAY ============ */
+.overlay{ position:fixed; inset:0; background:rgba(15,14,12,.55); z-index:90; display:flex; align-items:center; justify-content:center; padding:24px; }
+.overlay[hidden]{ display:none !important; }
+.modal{ background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:34px 26px 26px; max-width:320px; width:100%; text-align:center; }
+.modal .big-ic{ font-size:22px; display:block; margin-bottom:14px; }
+.modal h3{ font-size:24px; margin-bottom:10px; }
+.modal p{ font-size:12px; color:var(--text-dim); margin:0; letter-spacing:.04em; }
+.modal .amount{ font-size:46px; color:var(--gold); margin:10px 0 6px; }
+
+.toast{
+  position:fixed; top:calc(72px + env(safe-area-inset-top,0px)); left:50%; transform:translateX(-50%) translateY(-4px);
+  background:var(--accent); color:var(--accent-ink); padding:9px 18px; border-radius:10px;
+  font-size:10.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  z-index:95; opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.miss{ background:transparent; color:var(--text-dim); border:1px solid var(--line); }
+
+
+/* ============ PODEST ============ */
+.podium{
+  display:grid; grid-template-columns:1fr 1.18fr 1fr; gap:8px; align-items:end;
+  border-bottom:1px solid var(--line); padding-top:6px;
+}
+.pod{ text-align:center; min-width:0; }
+.pod-name{ font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pod-score{ font-family:'Instrument Serif',Georgia,serif; font-size:17px; color:var(--text-dim); margin:2px 0 10px; }
+.pod-block{
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid var(--line); border-bottom:none; border-radius:12px 12px 0 0;
+  font-family:'Instrument Serif',Georgia,serif; font-size:24px; color:var(--text-dim);
+}
+.pod.p1 .pod-name{ font-size:13.5px; }
+.pod.p1 .pod-score{ color:var(--gold); font-size:22px; }
+.pod.p1 .pod-block{ height:98px; background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-size:30px; }
+.pod.p2 .pod-block{ height:74px; }
+.pod.p3 .pod-block{ height:58px; }
+.pod.me .pod-name{ font-weight:700; }
+
+.empty{ font-size:12px; color:var(--text-dim); text-align:center; padding:30px 12px; letter-spacing:.04em; }
