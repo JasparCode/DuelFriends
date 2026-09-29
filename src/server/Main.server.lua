@@ -1,0 +1,1 @@
+print("DuelFriends Server läuft")
